@@ -421,10 +421,10 @@ init = () ->
 
   $("#phone").append master
 
-  $(window).mousedown(() -> Mouse.down = true)
-  $(window).mouseup(() -> Mouse.down = false)
+  $(window).bind("touchstart mousedown", () -> Mouse.down = true)
+  $(window).bind("touchend mouseup", () -> Mouse.down = false)
 
-  $("#screen").mousemove((e) ->
+  $("#screen").bind("touchmove mousemove", (e) ->
     if Mouse.down
       w = Visual.ctx.canvas.width;
       h = Visual.ctx.canvas.height;
