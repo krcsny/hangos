@@ -519,13 +519,13 @@ init = function() {
     html: [mainrec, muteonrec, volumeDown, volumeUp]
   });
   $("#phone").append(master);
-  $("#screen").on("touchstart mousedown", function() {
+  $("canvas").on("touchstart mousedown", function() {
     return Mouse.down = true;
   });
-  $("#screen").on("touchend mouseup", function() {
+  $("canvas").on("touchend mouseup", function() {
     return Mouse.down = false;
   });
-  $("#screen").on("touchmove mousemove", function(e) {
+  $("canvas").on("touchmove mousemove", function(e) {
     var h, w, x, y;
     if (Mouse.down) {
       $("#text").html(e.offsetX);
@@ -534,6 +534,8 @@ init = function() {
       x = e.offsetX;
       y = e.offsetY;
       return Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h));
+    } else {
+      return $("#text").html("NO MOUSE DOWN");
     }
   });
   Visual.init();

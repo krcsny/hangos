@@ -421,10 +421,11 @@ init = () ->
 
   $("#phone").append master
 
-  $("#screen").on("touchstart mousedown", () -> Mouse.down = true)
-  $("#screen").on("touchend mouseup", () -> Mouse.down = false)
+  $("canvas").on("touchstart mousedown", () -> Mouse.down = true)
+  $("canvas").on("touchend mouseup", () -> Mouse.down = false)
 
-  $("#screen").on("touchmove mousemove", (e) ->
+  $("canvas").on("touchmove mousemove", (e) ->
+
     if Mouse.down
       $("#text").html e.offsetX
       w = Visual.ctx.canvas.width;
@@ -432,6 +433,8 @@ init = () ->
       x = e.offsetX
       y = e.offsetY
       Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h))
+    else
+      $("#text").html "NO MOUSE DOWN"
   )
 
   Visual.init()
