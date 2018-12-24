@@ -52,6 +52,7 @@ html, body{
   align-content: stretch;
   background-color: #0006;
   z-index: 100;
+  display:none;
 }
 #call{
   width: 100%;
