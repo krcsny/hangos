@@ -84,8 +84,8 @@ button{
   border:none;
   color : #000;
   flex-grow: 1;
-  font-size:300%;
-  /*font-size:4em;*/
+  /*font-size:350%;*/
+  font-size:4em;
   /*font-size:5vw;*/
   font-family: monospace;
   opacity: 0.5;
