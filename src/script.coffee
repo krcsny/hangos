@@ -26,7 +26,7 @@ Visual =
     w = @ctx.canvas.width
     h =  @ctx.canvas.height
     # @ctx.clearRect(0, 0, w, h)
-    @ctx.fillStyle = "#76BED0"
+    @ctx.fillStyle = if MasterRecorder? and MasterRecorder.isRecording() then "#F55D3E22" else "#76BED0"
     @ctx.fillRect(0, 0, w, h)
     @slots w, h
     @ctx.lineJoin = "bezel"
@@ -102,7 +102,7 @@ FX =
 
       when "Freeverb"
         r = new Tone.Freeverb().toMaster()
-        r.sign = "&"
+        r.sign = "&sum;"
         r.getVal = () ->
           (@roomSize.value - 0.5) / 0.45
         r.setVal = (y) ->
@@ -139,7 +139,7 @@ FX =
           r.set "delayTime", y
 
       when "BitCrusher"
-        r = new Tone.BitCrusher(3).toMaster()
+        r = new Tone.BitCrusher(5).toMaster()
         r.sign = "#"
         r.getVal = () ->
           1 - ((@bits - 3) / 3)
@@ -165,7 +165,10 @@ FX =
 Math.clamp = (x, min, max) ->
   Math.min(Math.max(x, min), max)
 
+MasterRecorder = null
+
 Recorder = 
+  muteOnRec : false
   recording : false
   rec : null
   audioChunks : []
@@ -196,8 +199,8 @@ Recorder =
     audioBlob = new Blob(@audioChunks)
     @url = URL.createObjectURL(audioBlob)
     # @audio = new Audio(@url)
-    @ready @url
     @recording = false
+    @ready @url
     # audio.play()
     
   record : (mic) ->
@@ -216,21 +219,22 @@ Recorder =
     # setTimeout((() -> Recorder.rec.stop()),3000)
   start : () ->
     Mic.open().then(@record.bind(@))
+    Tone.Master.mute = @muteOnRec
     # navigator.mediaDevices.getUserMedia({ audio: true })
       # .then(@record.bind(Recorder))
 
-  # saveFile : (name, blob) ->
-  #   if (data != null && navigator.msSaveBlob)
-  #       return navigator.msSaveBlob(new Blob([data], { type: type }), name);
-  #   var a = $("<a style='display: none;'/>");
-  #   var url = window.URL.createObjectURL(new Blob([data], {type: type}));
-  #   a.attr("href", url);
-  #   a.attr("download", name);
-  #   $("body").append(a);
-  #   a[0].click();
-  #   window.URL.revokeObjectURL(url);
-  #   a.remove();
-  # }
+  saveFile : (blob) ->
+    a = $("<a style='display: none;'/>")
+    # blob = new Blob(@audioChunks, {type: 'audio/ogg; codecs=opus'})
+    url = window.URL.createObjectURL(blob)
+    a.attr("href", url)
+    date = new Date()
+    name = "hangos " + date.toTimeString().substr(0,9).replace(/:/g, "-") + date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear() 
+    a.attr("download", name)
+    $("body").append(a)
+    a[0].click()
+    window.URL.revokeObjectURL(url)
+    a.remove()
     
   ready : (url, blob) ->
     # console.log @audio
@@ -242,6 +246,7 @@ Recorder =
     slot.buffer = b
     slot.buffer.reverse = slot.effect.sign is "<"
     @togglePlayer @currentSlot
+    Tone.Master.mute = false
 
   togglePlayer : (s) ->
     if Recorder.slots[s].buffer.loaded
@@ -271,7 +276,6 @@ Recorder =
     slot.effect = FX.create((slot.effect.index + 1) % FX.names.length, slot)
     slot.connect slot.effect
     slot.buffer.reverse = slot.effect.sign is "<"
-    slot.playbackRate = 1
 
   getEffectValue : (s) ->
     e = @slots[s].effect.index
@@ -299,6 +303,11 @@ setbuttons = (s, show) ->
     $($($("#buttons").children()[s]).children()[x])[show]()
     # $("#buttons:nth-child(#{s}):nth-child(#{x})").hide()
 
+setMasterButtons = (show) ->
+  for b in [1..3]
+    $($("#master").children()[b])[show]()
+
+
 checkstates = () ->
   playing = false
   for s in [0..Slots-1]
@@ -310,11 +319,7 @@ checkstates = () ->
       h = "&#x25b6;"
     $($($("#buttons").children()[s]).children()[1]).html(h)
   
-  $($($("#phone").children()[2]).children()[1]).html(if playing then "&#x25a0;" else "&#x25b6;")
-    # if Recorder.currentSlot is s
-    #   $($("#buttons").children()[s]).addClass "current"
-    # else
-    #   $($("#buttons").children()[s]).removeClass "current"
+  # $($($("#phone").children()[2]).children()[1]).html(if playing then "&#x25a0;" else "&#x25b6;")
 
 Mouse =
   down : false
@@ -367,36 +372,51 @@ init = () ->
 
   volumeDown = $("<button>", 
     html : "-"
-    class :"numpad"
+    class :"numpad, masterbutton"
     click : (e) ->
       Tone.Master.volume.value = Math.clamp(Tone.Master.volume.value - 1, -64, 12)
   )
   volumeUp = $("<button>", 
     html : "+"
-    class :"numpad"
+    class :"numpad, masterbutton"
     click : (e) ->
       Tone.Master.volume.value = Math.clamp(Tone.Master.volume.value + 1, -64, 12)
   )
   mainrec = $("<button>", 
-    # html : "&#x25cf;"
-    html : "&nbsp;"
-    class :"numpad"
+    html : "&#x25cf;"
+    # html : "&nbsp;"
+    class :"numpad, masterbutton, masterrecord"
     click : (e) ->
-      # Recorder.toggleRecord -1
+      if MasterRecorder.isRecording()
+        MasterRecorder.finishRecording()
+        $("#master").removeClass "record"
+        setMasterButtons "show"
+      else
+        MasterRecorder.startRecording()
+        $("#master").addClass "record"
+        setMasterButtons "hide"
   )
   mainplay = $("<button>", 
     html : "&#x25b6;"
-    class :"numpad"
+    class :"numpad, masterbutton"
     click : (e) ->
       playing = Recorder.slots.reduce(((a, v) -> if a then a else v.state is "started"), false)
       for s in Recorder.slots
         if s.buffer.loaded
           if playing then s.stop() else s.start()        
   )
+  muteonrec = $("<button>", 
+    html : "h"
+    class :"numpad, masterbutton"
+    click : (e) ->
+      Recorder.muteOnRec = not Recorder.muteOnRec
+      $(@).html(if Recorder.muteOnRec then "f" else "h")
+  )
 
   master = $("<div>",
     class : "buttonrow"
-    html : [mainrec, mainplay, volumeDown, volumeUp]
+    id : "master"
+    html : [mainrec, muteonrec, volumeDown, volumeUp]
   )
 
   $("#phone").append master
@@ -415,6 +435,9 @@ init = () ->
 
   Visual.init()
   Recorder.init()
+  MasterRecorder = new WebAudioRecorder(Tone.Master, workerDir : "lib/", encoding : "mp3")
+  MasterRecorder.onComplete = (rec, blob) ->
+    Recorder.saveFile(blob)
   setInterval(checkstates, 100)
 
 init()

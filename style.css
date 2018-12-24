@@ -34,7 +34,7 @@ html, body{
   /*padding: 4px;*/
   display: flex;
   align-content: stretch;
-  background-color: #76BED0;
+  /*background-color: #76BED0;*/
 }
 #text{
   white-space: pre-wrap;
@@ -56,7 +56,7 @@ html, body{
   max-height: 2em;
 }
 #buttons{
-  height: 54%;
+  height: 53%;
   display: flex;
   align-content: stretch;
   justify-content: center;
@@ -71,30 +71,42 @@ html, body{
   flex-grow: 1;
   border:1px solid #5550;
 }
+
 button{
   outline: none;
-  /*background-color: #000;*/
+  background-color: #6666;
   border:none;
   color : #000;
   flex-grow: 1;
   font-size:4em;
   font-family: monospace;
   opacity: 0.5;
+
   /*transition: transform 0.125s;*/
 }
 .current{
   background-color:#a42;
 }
 button:hover{
-  /*background-color: #626262;*/
+  /*background-color: #62626222;*/
   color : #000;
   cursor: pointer;
   /*filter: invert(100%);*/
   opacity: 1.0;
 
 }
+.masterrecord{
+  color: #F55D3E;
+}
+.masterrecord:hover{
+  background-color: #aaa;
+}
+.masterbutton:hover{
+  background-color: #aaa;
+}
 .record{
   background-color: #F55D3E;
+  color : #000;
 }
 .play{
   background-color: #F7CB15;
