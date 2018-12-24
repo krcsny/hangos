@@ -531,7 +531,6 @@ init = function() {
     x -= $("canvas").position().left;
     y -= $("canvas").position().top;
     y = Math.clamp(y, 0, h);
-    console.log(e.targetTouches[0]);
     if (touchstart || e.type === "mousedown") {
       Mouse.down = true;
     }
