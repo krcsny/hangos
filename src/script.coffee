@@ -427,12 +427,19 @@ init = () ->
     e = if touchstart then e.originalEvent else e
     w = Visual.ctx.canvas.width
     h = Visual.ctx.canvas.height
-    x = if touchstart then e.targetTouches[0].offsetX else e.offsetX
-    y = if touchstart then e.targetTouches[0].offsetY else e.offsetY
+    x = if touchstart then e.targetTouches[0].pageX else e.offsetX
+    y = if touchstart then e.targetTouches[0].pageY else e.offsetY
+    x -= $("canvas").position().left
+    y -= $("canvas").position().top
+    y = Math.clamp(y, 0, h)
+    console.log e.targetTouches[0]
     if touchstart or e.type is "mousedown"
       Mouse.down = true
+    $("#text").html x + " " + y
     if Mouse.down
-      Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h))  
+      slot = Math.floor((x / w) * Slots)
+      console.log slot
+      Recorder.setEffect(slot, 1 - (y / h))  
 
   $("canvas").on("touchstart mousedown mousemove touchmove", touchmouse)
 

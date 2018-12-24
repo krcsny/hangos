@@ -520,19 +520,26 @@ init = function() {
   });
   $("#phone").append(master);
   touchmouse = function(e) {
-    var h, touchstart, w, x, y;
+    var h, slot, touchstart, w, x, y;
     e.preventDefault();
     touchstart = e.type === 'touchstart' || e.type === 'touchmove';
     e = touchstart ? e.originalEvent : e;
     w = Visual.ctx.canvas.width;
     h = Visual.ctx.canvas.height;
-    x = touchstart ? e.targetTouches[0].offsetX : e.offsetX;
-    y = touchstart ? e.targetTouches[0].offsetY : e.offsetY;
+    x = touchstart ? e.targetTouches[0].pageX : e.offsetX;
+    y = touchstart ? e.targetTouches[0].pageY : e.offsetY;
+    x -= $("canvas").position().left;
+    y -= $("canvas").position().top;
+    y = Math.clamp(y, 0, h);
+    console.log(e.targetTouches[0]);
     if (touchstart || e.type === "mousedown") {
       Mouse.down = true;
     }
+    $("#text").html(x + " " + y);
     if (Mouse.down) {
-      return Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h));
+      slot = Math.floor((x / w) * Slots);
+      console.log(slot);
+      return Recorder.setEffect(slot, 1 - (y / h));
     }
   };
   $("canvas").on("touchstart mousedown mousemove touchmove", touchmouse);
