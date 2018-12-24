@@ -519,7 +519,7 @@ init = function() {
     html: [mainrec, muteonrec, volumeDown, volumeUp]
   });
   $("#phone").append(master);
-  $(window).on("touchstart mousedown", function() {
+  $("#screen").on("touchstart mousedown", function() {
     return Mouse.down = true;
   });
   $(window).on("touchend mouseup", function() {

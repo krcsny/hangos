@@ -421,7 +421,7 @@ init = () ->
 
   $("#phone").append master
 
-  $(window).on("touchstart mousedown", () -> Mouse.down = true)
+  $("#screen").on("touchstart mousedown", () -> Mouse.down = true)
   $(window).on("touchend mouseup", () -> Mouse.down = false)
 
   $("#screen").on("touchmove mousemove", (e) ->
