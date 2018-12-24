@@ -522,7 +522,7 @@ init = function() {
   $("#screen").on("touchstart mousedown", function() {
     return Mouse.down = true;
   });
-  $(window).on("touchend mouseup", function() {
+  $("#screen").on("touchend mouseup", function() {
     return Mouse.down = false;
   });
   $("#screen").on("touchmove mousemove", function(e) {
