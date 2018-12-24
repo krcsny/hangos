@@ -528,6 +528,7 @@ init = function() {
   $("#screen").on("touchmove mousemove", function(e) {
     var h, w, x, y;
     if (Mouse.down) {
+      $("#text").html(e.offsetX);
       w = Visual.ctx.canvas.width;
       h = Visual.ctx.canvas.height;
       x = e.offsetX;

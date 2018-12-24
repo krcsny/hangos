@@ -426,6 +426,7 @@ init = () ->
 
   $("#screen").on("touchmove mousemove", (e) ->
     if Mouse.down
+      $("#text").html e.offsetX
       w = Visual.ctx.canvas.width;
       h = Visual.ctx.canvas.height;
       x = e.offsetX
