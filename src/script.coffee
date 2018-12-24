@@ -467,6 +467,8 @@ init = () ->
   MasterRecorder = new WebAudioRecorder(Tone.Master, workerDir : "lib/", encoding : "mp3")
   MasterRecorder.onComplete = (rec, blob) ->
     Recorder.saveFile(blob)
+
+  # $("button").css "font-size", "%"
   setInterval(checkstates, 100)
 
 init()

@@ -570,6 +570,7 @@ init = function() {
   MasterRecorder.onComplete = function(rec, blob) {
     return Recorder.saveFile(blob);
   };
+  // $("button").css "font-size", "%"
   return setInterval(checkstates, 100);
 };
 
