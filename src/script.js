@@ -519,13 +519,13 @@ init = function() {
     html: [mainrec, muteonrec, volumeDown, volumeUp]
   });
   $("#phone").append(master);
-  $(window).bind("touchstart mousedown", function() {
+  $(window).on("touchstart mousedown", function() {
     return Mouse.down = true;
   });
-  $(window).bind("touchend mouseup", function() {
+  $(window).on("touchend mouseup", function() {
     return Mouse.down = false;
   });
-  $("#screen").bind("touchmove mousemove", function(e) {
+  $("#screen").on("touchmove mousemove", function(e) {
     var h, w, x, y;
     if (Mouse.down) {
       w = Visual.ctx.canvas.width;
