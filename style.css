@@ -55,7 +55,7 @@ html, body{
   align-content: stretch;
   justify-content: center;
   flex-direction: column;
-  transition: all 0.4s;
+  /*transition: all 0.4s;*/
 }
 .buttonrow{
   display: flex;
@@ -72,7 +72,7 @@ button{
   flex-grow: 1;
   font-size:4em;
   font-family: monospace;
-  transition: transform 0.125s;
+  /*transition: transform 0.125s;*/
 }
 button:hover{
   background-color: #626262;

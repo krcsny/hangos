@@ -157,6 +157,9 @@ Recorder = {
     s = $(e.currentTarget).parent().index();
     return this.slots[s].start();
   },
+  toggleLooping: function(s) {
+    return this.slots[s].loop = !this.slots[s].loop;
+  },
   toggleRecord: function(e) {
     var s;
     s = $(e.currentTarget).parent().index();
@@ -171,22 +174,33 @@ Recorder = {
 };
 
 init = function() {
-  var buttons, play, record, s, slots;
+  var buttons, looper, play, record, s, slots;
   slots = (function() {
     var j, ref, results;
     results = [];
     for (s = j = 0, ref = Slots - 1; (0 <= ref ? j <= ref : j >= ref); s = 0 <= ref ? ++j : --j) {
       record = $("<button>", {
         html: "R",
+        class: "numpad",
         click: Recorder.toggleRecord.bind(Recorder)
       });
       play = $("<button>", {
         html: "P",
+        class: "numpad",
         click: Recorder.togglePlayer.bind(Recorder)
       });
-      buttons = [record, play];
+      looper = $("<button>", {
+        html: "-",
+        class: "numpad",
+        click: function(e) {
+          s = $(e.currentTarget).parent().index();
+          Recorder.toggleLooping(s).bind(Recorder);
+          return $(this).html(Recorder.slots[s].loop ? "[]" : "-");
+        }
+      });
+      buttons = [record, play, looper];
       results.push($("<div>", {
-        class: "button-row",
+        class: "buttonrow",
         html: buttons
       }));
     }

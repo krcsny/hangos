@@ -132,6 +132,9 @@ Recorder =
     s = $(e.currentTarget).parent().index()
     @slots[s].start()
 
+  toggleLooping : (s) ->
+    @slots[s].loop = not @slots[s].loop
+
   toggleRecord : (e) ->
     s = $(e.currentTarget).parent().index()
     if @recording
@@ -148,16 +151,26 @@ init = () ->
     for s in [0..Slots - 1]
       record = $("<button>", 
         html : "R"
+        class :"numpad"
         click : Recorder.toggleRecord.bind(Recorder)
       )
       play = $("<button>", 
         html : "P"
+        class :"numpad"
         click : Recorder.togglePlayer.bind(Recorder)
       )
+      looper = $("<button>", 
+        html : "-"
+        class :"numpad"
+        click : (e) ->
+          s = $(e.currentTarget).parent().index()
+          Recorder.toggleLooping(s).bind(Recorder)
+          $(@).html(if Recorder.slots[s].loop then "[]" else "-")
+      )
       
-      buttons = [record, play]
+      buttons = [record, play, looper]
       $("<div>",
-        class : "button-row"
+        class : "buttonrow"
         html : buttons
       )
 
