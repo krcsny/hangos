@@ -421,21 +421,39 @@ init = () ->
 
   $("#phone").append master
 
-  $("canvas").on("touchstart mousedown", () -> Mouse.down = true)
-  $("canvas").on("touchend mouseup", () -> Mouse.down = false)
-
-  $("canvas").on("touchmove mousemove", (e) ->
-
+  touchmouse = (e) ->
+    e.preventDefault()
+    touchstart = e.type is 'touchstart' or e.type is 'touchmove'
+    e = if touchstart then e.originalEvent else e
+    w = Visual.ctx.canvas.width
+    h = Visual.ctx.canvas.height
+    x = if touchstart then e.targetTouches[0].offsetX else e.offsetX
+    y = if touchstart then e.targetTouches[0].offsetY else e.offsetY
+    if touchstart or e.type is "mousedown"
+      Mouse.down = true
     if Mouse.down
-      $("#text").html e.offsetX
-      w = Visual.ctx.canvas.width;
-      h = Visual.ctx.canvas.height;
-      x = e.offsetX
-      y = e.offsetY
-      Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h))
-    else
-      $("#text").html "NO MOUSE DOWN"
+      Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h))  
+
+  $("canvas").on("touchstart mousedown mousemove touchmove", touchmouse)
+
+  $("canvas").on("touchend mouseup", (e) -> 
+    e.preventDefault()
+    Mouse.down = false
   )
+  
+  # $(document).on("mouseup", () -> Mouse.down = false)
+
+  # $("canvas").on("touchmove mousemove", (e) ->
+  #   if Mouse.down
+  #     $("#text").html e.offsetX
+  #     w = Visual.ctx.canvas.width;
+  #     h = Visual.ctx.canvas.height;
+  #     x = e.offsetX
+  #     y = e.offsetY
+  #     Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h))
+  #   else
+  #     $("#text").html "NO MOUSE DOWN"
+  # )
 
   Visual.init()
   Recorder.init()

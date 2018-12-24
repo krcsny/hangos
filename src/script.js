@@ -393,7 +393,7 @@ Mouse = {
 };
 
 init = function() {
-  var buttons, fx, looper, mainplay, mainrec, master, muteonrec, play, record, s, slots, volumeDown, volumeUp;
+  var buttons, fx, looper, mainplay, mainrec, master, muteonrec, play, record, s, slots, touchmouse, volumeDown, volumeUp;
   slots = (function() {
     var j, ref, results;
     results = [];
@@ -519,25 +519,41 @@ init = function() {
     html: [mainrec, muteonrec, volumeDown, volumeUp]
   });
   $("#phone").append(master);
-  $("canvas").on("touchstart mousedown", function() {
-    return Mouse.down = true;
-  });
-  $("canvas").on("touchend mouseup", function() {
+  touchmouse = function(e) {
+    var h, touchstart, w, x, y;
+    e.preventDefault();
+    touchstart = e.type === 'touchstart' || e.type === 'touchmove';
+    e = touchstart ? e.originalEvent : e;
+    w = Visual.ctx.canvas.width;
+    h = Visual.ctx.canvas.height;
+    x = touchstart ? e.targetTouches[0].offsetX : e.offsetX;
+    y = touchstart ? e.targetTouches[0].offsetY : e.offsetY;
+    if (touchstart || e.type === "mousedown") {
+      Mouse.down = true;
+    }
+    if (Mouse.down) {
+      return Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h));
+    }
+  };
+  $("canvas").on("touchstart mousedown mousemove touchmove", touchmouse);
+  $("canvas").on("touchend mouseup", function(e) {
+    e.preventDefault();
     return Mouse.down = false;
   });
-  $("canvas").on("touchmove mousemove", function(e) {
-    var h, w, x, y;
-    if (Mouse.down) {
-      $("#text").html(e.offsetX);
-      w = Visual.ctx.canvas.width;
-      h = Visual.ctx.canvas.height;
-      x = e.offsetX;
-      y = e.offsetY;
-      return Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h));
-    } else {
-      return $("#text").html("NO MOUSE DOWN");
-    }
-  });
+  
+  // $(document).on("mouseup", () -> Mouse.down = false)
+
+  // $("canvas").on("touchmove mousemove", (e) ->
+  //   if Mouse.down
+  //     $("#text").html e.offsetX
+  //     w = Visual.ctx.canvas.width;
+  //     h = Visual.ctx.canvas.height;
+  //     x = e.offsetX
+  //     y = e.offsetY
+  //     Recorder.setEffect(Math.floor((x / w) * Slots), 1 - (y / h))
+  //   else
+  //     $("#text").html "NO MOUSE DOWN"
+  // )
   Visual.init();
   Recorder.init();
   MasterRecorder = new WebAudioRecorder(Tone.Master, {

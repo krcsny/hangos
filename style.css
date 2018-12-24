@@ -34,6 +34,7 @@ html, body{
   /*padding: 4px;*/
   display: flex;
   align-content: stretch;
+  touch-action: pan-y;
   /*background-color: #76BED0;*/
 }
 #text{
