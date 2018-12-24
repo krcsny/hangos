@@ -66,7 +66,7 @@ html, body{
 }
 button{
   outline: none;
-  background-color: #666;
+  background-color: #6662;
   border:1px solid #555;
   color : #bebdbc;
   flex-grow: 1;
@@ -74,9 +74,12 @@ button{
   font-family: monospace;
   /*transition: transform 0.125s;*/
 }
+.current{
+  background-color:#a42;
+}
 button:hover{
-  background-color: #626262;
-  color : #777;
+  /*background-color: #626262;*/
+  color : #a42;
   cursor: pointer;
 }
 img{

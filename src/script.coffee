@@ -41,20 +41,6 @@ Visual =
       @ctx.lineTo(x, y)
     @ctx.lineTo(w, 0.5 * h)
     @ctx.stroke()
-      
-    # segment = 128
-    # for part in [0..7]
-    #   @ctx.lineWidth = 1 + values[0] * (15 + Math.random() * 5)
-    #   @ctx.strokeStyle = @hsl 0.9 + Math.random() * 0.2, 0.8 + Math.random() * 0.1, 0.5, 0.5 # "d48"
-    #   @ctx.beginPath()
-    #   @ctx.moveTo(0, 0.5 * h)
-    #   for i in [0..segment - 1]    
-    #     val = (values[part * segment + i] + 1) / 2
-    #     x = w * ((i % segment) / segment)
-    #     y = val * 2 * h - h * 0.5
-    #     @ctx.lineTo(x, y)
-    #   @ctx.lineTo(w, 0.5 * h)
-    #   @ctx.stroke()
   draw : () ->
     @drawWaveform( if Recorder.recording then @micform.getValue() else @waveform.getValue());
     requestAnimationFrame(Visual.draw.bind(Visual));
@@ -85,10 +71,19 @@ Recorder =
   url : null
   slots : []
   currentSlot : 0
+  effects : [
+    Tone.Master
+    new Tone.PitchShift(-7).toMaster()
+    new Tone.PitchShift(12).toMaster()
+    new Tone.BitCrusher(3).toMaster()
+  ]
+  effectSigns : ["_", "v", "^", '#']
   init : () ->
     @slots = 
       for s in [0..Slots - 1]
-        new Tone.Player().toMaster()
+        sl = new Tone.Player().toMaster()
+        sl.effect = 0
+        sl
   stop : () -> @rec.stop()
 
   pushdata : (e) ->
@@ -127,10 +122,22 @@ Recorder =
     new Tone.Buffer(url, @bufferReady.bind(@))
   bufferReady : (b) ->
     @slots[@currentSlot].buffer = b
+    if @slots[@currentSlot].cue 
+      @slots[@currentSlot].cue = false
+      @togglePlayer @currentSlot
 
-  togglePlayer : (e) ->
-    s = $(e.currentTarget).parent().index()
-    @slots[s].start()
+  togglePlayer : (s) ->
+    if Recorder.slots[s].buffer.loaded
+      if @slots[s].state is "started"
+        @slots[s].stop()
+        "||"
+      else 
+        @slots[s].start()
+        "|>"
+    else if @recording and @currentSlot is s
+      s.cue = true
+      @stop()
+      "||"
 
   toggleLooping : (s) ->
     @slots[s].loop = not @slots[s].loop
@@ -138,37 +145,69 @@ Recorder =
   toggleRecord : (e) ->
     s = $(e.currentTarget).parent().index()
     if @recording
+      setbuttons @currentSlot, "show"
       @stop()
 
     if s isnt @currentSlot or not @recording
+      $($($("#buttons").children()[@currentSlot]).children()[0]).removeClass "current"
       @currentSlot = s
+      $($($("#buttons").children()[s]).children()[0]).addClass "current"
+      setbuttons @currentSlot, "hide"
       @start()
 
+  cycleEffect : (s) ->
+    @slots[s].disconnect @effects[@slots[s].effect]
+    @slots[s].effect = (@slots[s].effect + 1) % @effects.length
+    @slots[s].connect @effects[@slots[s].effect]
+
+
+
+
+setbuttons = (s, show) ->
+  for ss in [0..Slots-1]
+    if ss isnt s
+      $($("#buttons").children()[ss])[show]()
+  for x in [1..4]
+    $($($("#buttons").children()[s]).children()[x])[show]()
+    # $("#buttons:nth-child(#{s}):nth-child(#{x})").hide()
+
+checkstates = () ->
+  for s in [0..Slots-1]
+    $($($("#buttons").children()[s]).children()[1]).html(if Recorder.slots[s].state is "started" then "&#x25a0;" else if Recorder.slots[s].buffer.loaded then "&#x25b6;" else "&empty;")
 
 
 init = () ->
   slots = 
     for s in [0..Slots - 1]
       record = $("<button>", 
-        html : "R"
+        html : "&#x25cf;"
         class :"numpad"
         click : Recorder.toggleRecord.bind(Recorder)
       )
       play = $("<button>", 
-        html : "P"
-        class :"numpad"
-        click : Recorder.togglePlayer.bind(Recorder)
-      )
-      looper = $("<button>", 
-        html : "-"
+        html : ""
         class :"numpad"
         click : (e) ->
           s = $(e.currentTarget).parent().index()
-          Recorder.toggleLooping(s).bind(Recorder)
-          $(@).html(if Recorder.slots[s].loop then "[]" else "-")
+          Recorder.togglePlayer(s)
       )
-      
-      buttons = [record, play, looper]
+      looper = $("<button>", 
+        html : "1"
+        class :"numpad"
+        click : (e) ->
+          s = $(e.currentTarget).parent().index()
+          Recorder.toggleLooping(s)
+          $(@).html(if Recorder.slots[s].loop then "&infin;" else "1")
+      )
+      fx = $("<button>", 
+        html : "_"
+        class :"numpad"
+        click : (e) ->
+          s = $(e.currentTarget).parent().index()
+          Recorder.cycleEffect(s)
+          $(@).html(Recorder.effectSigns[Recorder.slots[s].effect])
+      )
+      buttons = [record, play, looper, fx]
       $("<div>",
         class : "buttonrow"
         html : buttons
@@ -178,6 +217,6 @@ init = () ->
 
   Visual.init()
   Recorder.init()
-
+  setInterval(checkstates, 100)
 
 init()
