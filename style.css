@@ -23,6 +23,7 @@ html, body{
   box-sizing: border-box;
   background-color: #555;
   padding: 0.5em;
+  display: flex;
   align-content: center;
   justify-content: center;
   flex-direction: column;
@@ -60,6 +61,7 @@ html, body{
   max-height: 2em;
 }
 #buttons{
+  position: relative;
   height: 53%;
   display: flex;
   align-content: stretch;
@@ -82,7 +84,7 @@ button{
   border:none;
   color : #000;
   flex-grow: 1;
-  font-size:400%;
+  font-size:300%;
   /*font-size:4em;*/
   /*font-size:5vw;*/
   font-family: monospace;
